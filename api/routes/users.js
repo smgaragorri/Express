@@ -1,0 +1,81 @@
+var express = require("express");
+var router = express.Router();
+var users_controller = require("../controllers/usersController");
+const { check } = require("express-validator/check");
+
+// Validaciones
+const valid_user = [
+  // Validación: name
+  check(
+    "name",
+    "El nombre debe tener al menos 3 caracteres y no puede incluir números"
+  )
+    .isAlpha((locale = "es-ES"), { ignore: "- /" })
+    .custom((value) => {
+      return value.match(
+        /^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]{3,}$/
+      );
+    }),
+  // Validación: surname
+  check(
+    "surname",
+    "Los apellidos indicados debe tener al menos 3 caracteres y no pueden incluir números"
+  )
+    .isAlpha((locale = "es-ES"), { ignore: "- /" })
+    .custom((value) => {
+      return value.match(
+        /^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]{3,}$/
+      );
+    }),
+  // Validación: age
+  check("age", "La edad indicada debe estar comprendida entre 0 y 125").isFloat(
+    { min: 0, max: 125 }
+  ),
+
+  // Validación: dni
+  check("dni", "El dni indicado debe contener 9 caracteres alfanuméricos")
+    .isLength({ min: 9, max: 9 })
+    .isAlphanumeric(),
+
+  // Validación: birthday
+  check(
+    "birthday",
+    "El cumpleaños indicado debe especificarse en formato aaaa-mm-dd"
+  ).isISO8601(),
+
+  // Validación: favouriteColour
+  check(
+    "favouriteColour",
+    "El color favorito indicado debe tener al menos 3 caracteres y no puede incluir números"
+  )
+    .isAlpha((locale = "es-ES"), { ignore: "- /" })
+    .custom((value) => {
+      return value.match(
+        /^[a-zA-ZÀ-ÿ\u00f1\u00d1]+(\s*[a-zA-ZÀ-ÿ\u00f1\u00d1]*)*[a-zA-ZÀ-ÿ\u00f1\u00d1]{3,}$/
+      );
+    }),
+  // Validación: gender
+  check(
+    "gender",
+    "El sexo indicado debe ser uno de los siguientes: Hombre, Mujer, Otro, No especificado"
+  )
+    .isString()
+    .isIn(["Hombre", "Mujer", "Otro", "No especificado"]),
+];
+
+// GET ONE USER
+router.get("/:id", users_controller.users_get_one);
+
+// GET USERS
+router.get("/", users_controller.users_list);
+
+// POST
+router.post("/", valid_user, users_controller.users_create);
+
+// PUT
+router.put("/:id", valid_user, users_controller.users_update_one);
+
+// DELETE
+router.delete("/:id", users_controller.users_delete_one);
+
+module.exports = router;
